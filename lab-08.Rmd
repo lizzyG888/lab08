@@ -16,6 +16,80 @@ library(tidymodels)
 ```{r, warning=FALSE, message=FALSE}
 library(openintro)
 glimpse(email)
+
+count(email, spam)
+email %>% filter(winner == "no") %>% count(spam)
+email %>% filter(winner == "yes") %>% count(spam)
+
+set.seed(1116)
+email_split <- initial_split(email, prop = 0.80)
+train_data <- training(email_split)
+test_data  <- testing(email_split)
+
+email_fit <- logistic_reg() %>%
+  set_engine("glm") %>%
+  fit(spam ~ winner, data = train_data)
+
+email_pred <- predict(email_fit, test_data, type = "prob") %>%
+  bind_cols(test_data %>% select(spam))
+
+email_pred %>%
+  roc_curve(
+    truth = spam,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+email_pred %>%
+  roc_auc(
+    truth = spam,
+    .pred_1,
+    event_level = "second"
+  )
+
+
+email_class1 <- predict(email_fit, test_data) %>%
+  bind_cols(test_data %>% select(spam))
+
+conf_mat(email_class1,
+         truth = spam,
+         estimate = .pred_class)
+
+
+
+email_fit2 <- logistic_reg() %>%
+  set_engine("glm") %>%
+  fit(spam ~ winner + num_char, data = train_data)
+
+email_pred2 <- predict(email_fit2, test_data, type = "prob") %>%
+  bind_cols(test_data %>% select(spam))
+
+email_pred2 %>%
+  roc_curve(
+    truth = spam,
+    .pred_1,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+email_pred2 %>%
+  roc_auc(
+    truth = spam,
+    .pred_1,
+    event_level = "second"
+  )
+
+
+email_class2 <- predict(email_fit2, test_data) %>%
+  bind_cols(test_data %>% select(spam))
+
+conf_mat(email_class2,
+         truth = spam,
+         estimate = .pred_class)
+
+
+
 ```
 
 1. What proportion of emails are spam? Calculate the proportion of spam separately for emails with and without the word “winner”.
@@ -23,6 +97,10 @@ glimpse(email)
 2. Fit a logistic regression of `spam` on `winner` and write down the fitted model. Use `predict(..., type = "prob")` to find the predicted probability of spam for each group. Compare them with your previously calculated proportions.  
 
 3. How about fitting a logistic regression of `spam` on `winner` and `num_char`? Calculate the confusion matrix of the fitted logistic model on this new model, and compare with the confusion matrix result of the previous model, relying on `winner` only. Explain the differences on confusion matrix.
+
+model 2 correctly identifies 2 spam and 715 non spam, whereas model 1 doesnt idenitfy any spam correctly.
+
+
 
 **Hint:** `augment()` adds the predicted class (`.pred_class`) to the data.
 It labels an email as spam when its predicted probability is above 0.5.
