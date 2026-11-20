@@ -178,6 +178,16 @@ weather_Portland <- weather_noNA %>%
 
 ```{r}
 
+
+weather_Portlandc <- weather_Portland %>%
+  mutate(RainTomorrow = ifelse(RainTomorrow == "Yes", 1, 0))
+
+rain_linear_fit = linear_reg() %>%
+  set_engine("lm") %>%
+  fit(RainTomorrow~ RainToday, data = weather_Portlandc) 
+
+  tidy(rain_linear_fit)
+
 ```
 
 2. For each point in our dataset, what are the fitted probabilities that tomorrow it's going to rain? 
@@ -186,19 +196,30 @@ weather_Portland <- weather_noNA %>%
 
 ```{r}
 
+rain_pred <- predict(rain_linear_fit, weather_Portlandc) %>%
+  bind_cols(weather_Portlandc)
+
+rain_pred %>%
+  select(RainToday, RainTomorrow, .pred)
+
+rain_pred %>%
+  ggplot(aes(x = .pred)) +
+  geom_histogram(binwidth = 0.05) +
+  labs(
+    x = "Fitted probability of rain tomorrow",
+    y = "Frequency"
+  )
+
+
 ```
 
 > Hint: how many unique values do the predicted probabilities take? What do these value correspond to?
 
-*Add your answer here*
+only 2 possible predicted probabilities as the estimator vaiable is binary.
 
 - Are there any missing values? Why?
 
-```{r}
-
-```
-
-*Add your answer here*
+Weather observations were not recorded on certain days. Some weather measurements or classifications were unavailable. The original dataset contained missing observations.
 
 # Exercise 3: Split the data and build workflows
 
