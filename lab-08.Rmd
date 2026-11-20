@@ -279,19 +279,28 @@ tidy(weather_fit1)
 
 - Start by the recipe. This will be a simple recipe, because we have not done many pre-processing steps, but do remove missing values and transform categorical variables into dummy variables:
 
-```{r recipe2, eval=FALSE}
+```{r recipe2}
 # remove eval=FALSE
 weather_rec2 <- recipe(
-  RainTomorrow ~ ___+___+___+___, # include your formula
+  RainTomorrow ~ MinTemp+RainToday+Rainfall+MaxTemp, # include your formula
   data = weather_Portland
   ) %>%
-  step_naomit(___) %>%.          # exclude cases with missing values in all predictors
-  step_dummy(all_nominal(), ___) # exclude all outcomes
+  step_naomit(all_predictors()) %>%        # exclude cases with missing values in all predictors
+  step_dummy(all_nominal_predictors()) # exclude all outcomes
 ```
 
 - Save the model, workflow and finally, let's fit to the training data.
 
 ```{r}
+
+weather_wflow2 <- workflow() %>% # initiate workflow
+  add_model(weather_mod1) %>%                   # add model
+  add_recipe(weather_rec2)   
+
+
+weather_fit2 <- weather_wflow2 %>% 
+  fit(data = train_data)
+tidy(weather_fit2)
 
 ```
 
@@ -299,12 +308,35 @@ weather_rec2 <- recipe(
 
 - Create the ROC curve and get the AUC (area under the curve) value for your first simple logistic regression model.
 
-```{r eval=FALSE}
+```{r }
 # remove eval=FALSE
-weather_pred2 <- predict(___, test_data, type = "prob") %>%
+weather_pred1 <- predict(weather_fit1, test_data, type = "prob") %>%
+  bind_cols(test_data)
+weather_pred1 %>%
+  roc_curve(                      # plot ROC curve
+    truth = RainTomorrow,
+    .pred_Yes,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+weather_pred1 %>%
+  roc_auc(                  # get AUC value
+    truth = RainTomorrow,
+    .pred_Yes,
+    event_level = "second"
+  )
+
+```
+
+- Create now the ROC curve and get the AUC (area under the curve) value for your second model.
+
+```{r}
+
+weather_pred2 <- predict(weather_fit2, test_data, type = "prob") %>%
   bind_cols(test_data)
 weather_pred2 %>%
-  ___(                      # plot ROC curve
+  roc_curve(                      # plot ROC curve
     truth = RainTomorrow,
     .pred_Yes,
     event_level = "second"
@@ -312,26 +344,22 @@ weather_pred2 %>%
   autoplot()
 
 weather_pred2 %>%
-  ___(                  # get AUC value
+  roc_auc(                  # get AUC value
     truth = RainTomorrow,
     .pred_Yes,
     event_level = "second"
   )
-```
 
-- Create now the ROC curve and get the AUC (area under the curve) value for your second model.
-
-```{r}
 
 ```
 
 - Which model seems to have a better performance?
 
-*Add your answer here*
+second model as it has a larger AUC value, indicating a greater ability to distinguish between observations where it rains tomorrow and those where it does not.
 
 4. Now focus on the second model. Consider several thresholds for predicting `RainTomorrow` and look at the number of false positives and false negatives. For example:
 
-```{r eval = FALSE}
+```{r }
 # remove eval = FALSE
 cutoff_prob <- 0.5
 weather_pred2 %>%
@@ -345,11 +373,11 @@ weather_pred2 %>%
 
 - What is the the false positive rate with `cutoff_prob = 0.3`? 
 
-*Add your answer here*
+51/366
 
 - What about the false negative rate?
 
-*Add your answer here*
+62/366
 
 # Exercise 4: Extend our model [OPTIONAL]
 
