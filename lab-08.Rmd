@@ -233,13 +233,18 @@ set.seed(111723)
 
 ```{r}
 
+
+weather_split <- initial_split(weather_Portland, prop = 0.80)
+train_data <- training(weather_split)
+test_data  <- testing(weather_split)
+
 ```
 
 2. Refit the simple logistic regression using `RainToday` as predictor on this training data, using `tidymodels` recipes and workflows.
 
 - Start by the recipe. First initialize the recipe, then remove observations with missing values using `step_naomit()` and finally use `step_dummy` to convert categorical to dummy variables.
 
-```{r recipe1, eval=FALSE}
+```{r recipe1}
 # remove eval=FALSE
 weather_rec1 <- recipe(
   RainTomorrow ~ RainToday, 
@@ -251,21 +256,21 @@ weather_rec1 <- recipe(
 
 - Build your workflow combining model and recipe
 
-```{r workflow1, eval = FALSE}
+```{r workflow1}
 # remove eval=FALSE
-weather_mod1 <- ___ %>% 
-  set_engine(___)
+weather_mod1 <- logistic_reg() %>% 
+  set_engine("glm")
 weather_wflow1 <- workflow() %>% # initiate workflow
-  ___(___) %>%                   # add model
-  ___(___)                       # add recipe
+  add_model(weather_mod1) %>%                   # add model
+  add_recipe(weather_rec1)                       # add recipe
 ```
 
 - Now fit your model on the training data
 
-```{r fit1, eval = FALSE}
+```{r fit1}
 # remove eval=FALSE
 weather_fit1 <- weather_wflow1 %>% 
-  fit(data = ___)
+  fit(data = train_data)
 tidy(weather_fit1)
 ```
 

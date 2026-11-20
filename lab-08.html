@@ -653,11 +653,16 @@ contained missing observations.</p>
 <p>Let us set a seed and perform a split of our data.</p>
 <pre class="r"><code>set.seed(111723)</code></pre>
 <ol style="list-style-type: decimal">
-<li><p>Split the data into a training set (80% of your Portland data)
-and a testing set.</p></li>
-<li><p>Refit the simple logistic regression using <code>RainToday</code>
-as predictor on this training data, using <code>tidymodels</code>
-recipes and workflows.</p></li>
+<li>Split the data into a training set (80% of your Portland data) and a
+testing set.</li>
+</ol>
+<pre class="r"><code>weather_split &lt;- initial_split(weather_Portland, prop = 0.80)
+train_data &lt;- training(weather_split)
+test_data  &lt;- testing(weather_split)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Refit the simple logistic regression using <code>RainToday</code> as
+predictor on this training data, using <code>tidymodels</code> recipes
+and workflows.</li>
 </ol>
 <ul>
 <li>Start by the recipe. First initialize the recipe, then remove
@@ -676,18 +681,23 @@ weather_rec1 &lt;- recipe(
 <li>Build your workflow combining model and recipe</li>
 </ul>
 <pre class="r"><code># remove eval=FALSE
-weather_mod1 &lt;- ___ %&gt;% 
-  set_engine(___)
+weather_mod1 &lt;- logistic_reg() %&gt;% 
+  set_engine(&quot;glm&quot;)
 weather_wflow1 &lt;- workflow() %&gt;% # initiate workflow
-  ___(___) %&gt;%                   # add model
-  ___(___)                       # add recipe</code></pre>
+  add_model(weather_mod1) %&gt;%                   # add model
+  add_recipe(weather_rec1)                       # add recipe</code></pre>
 <ul>
 <li>Now fit your model on the training data</li>
 </ul>
 <pre class="r"><code># remove eval=FALSE
 weather_fit1 &lt;- weather_wflow1 %&gt;% 
-  fit(data = ___)
+  fit(data = train_data)
 tidy(weather_fit1)</code></pre>
+<pre><code>## # A tibble: 2 × 5
+##   term          estimate std.error statistic  p.value
+##   &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)      -1.07    0.0589     -18.1 2.76e-73
+## 2 RainToday_Yes     1.33    0.0902      14.7 3.27e-49</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Fit now a multiple logistic regression, i.e. using multiple
 explanatory variables, to predict <code>RainTomorrow</code>. We will use
