@@ -144,11 +144,22 @@ weather %>%
 
 ```{r}
 
+
+weather_noNA = weather %>% drop_na(RainTomorrow)
+
 ```
 
 2. Which cities are the ones with more rain days? To do this, let's analyze the `RainToday` variable. 
 
 ```{r}
+
+
+weather_noNA %>% group_by(Location) %>% summarise(
+  count = sum(!is.na(RainToday)),
+) %>% arrange(desc(count))
+
+
+
 
 ```
 
@@ -157,7 +168,7 @@ weather %>%
 We will focus our analysis on the city of `Portland`.
 Remove `eval=FALSE` from below once you have defined the object `weather_noNA`.
 
-```{r eval=FALSE}
+```{r }
 # remove eval=FALSE
 weather_Portland <- weather_noNA %>%
   filter(Location == "Portland")

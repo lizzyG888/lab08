@@ -545,12 +545,32 @@ values:</p>
 ## 17 MinTemp       0.0102 
 ## 18 MaxTemp       0.00867</code></pre>
 <ol style="list-style-type: decimal">
-<li><p>Are there any missing values in our variable of interest
+<li>Are there any missing values in our variable of interest
 <code>RainTomorrow</code>? If so, we filter them out and save the new
-dataset as <code>weather_noNA</code>.</p></li>
-<li><p>Which cities are the ones with more rain days? To do this, let’s
-analyze the <code>RainToday</code> variable.</p></li>
+dataset as <code>weather_noNA</code>.</li>
 </ol>
+<pre class="r"><code>weather_noNA = weather %&gt;% drop_na(RainTomorrow)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Which cities are the ones with more rain days? To do this, let’s
+analyze the <code>RainToday</code> variable.</li>
+</ol>
+<pre class="r"><code>weather_noNA %&gt;% group_by(Location) %&gt;% summarise(
+  count = sum(!is.na(RainToday)),
+) %&gt;% arrange(desc(count))</code></pre>
+<pre><code>## # A tibble: 49 × 2
+##    Location     count
+##    &lt;fct&gt;        &lt;int&gt;
+##  1 Canberra      3402
+##  2 Sydney        3331
+##  3 Perth         3193
+##  4 Darwin        3192
+##  5 Hobart        3183
+##  6 Brisbane      3132
+##  7 Bendigo       3030
+##  8 Townsville    3027
+##  9 AliceSprings  3025
+## 10 MountGambier  3022
+## # ℹ 39 more rows</code></pre>
 </div>
 <div id="exercise-2-logistic-regression" class="section level1">
 <h1>Exercise 2: Logistic regression</h1>
